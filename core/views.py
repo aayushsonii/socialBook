@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import render,redirect
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
@@ -8,7 +9,9 @@ from django.contrib.auth.decorators import login_required
 # Create your views here.
 @login_required(login_url='signin')
 def index(request):
-    return render(request,"index.html")
+    user=User.objects.get(username=request.user.username)
+    userPro=Profile.objects.get(user=user)
+    return render(request,"index.html",{'user_profile':userPro})
 
 def signup(request):
     if request.method=='POST':
@@ -43,10 +46,25 @@ def signup(request):
     else:
         return render(request,'signup.html')
 
+@login_required(login_url='signin')
+def upload(request):
+    return HttpResponse('<h1>Upload></h1>')
+
 
 @login_required(login_url='signin')
 def setting(request):
-    return render(request,'setting.html')    
+    user = Profile.objects.get(user=request.user)
+    if request.method=='POST':
+        image = request.FILES.get('profile_pic') if request.FILES.get('profile_pic') else user.profPic
+        bio = request.POST['bio']
+        location = request.POST['location']
+        user.profPic=image
+        user.bio=bio
+        user.location=location
+        user.save()
+
+            
+    return render(request,'setting.html',{"user":user})    
 
 def signin(request):
     
