@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render,redirect
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
-from .models import Profile,Post
+from .models import Profile,Post,Liked_posts
 from django.contrib.auth.decorators import login_required
 
 
@@ -50,8 +50,23 @@ def signup(request):
 
 @login_required(login_url='signin')
 def liked_post(request):
-    pass
+    username = request.user.username
+    post_id = request.GET.get("post_id")
+    post = Post.objects.get(id=post_id)
 
+    like_filter = Liked_posts.objects.filter(post_id=post_id,username=username).first()
+    if like_filter:
+        like_filter.delete()
+        post.no_of_likes-=1
+        post.save()
+        return redirect('/')
+    else:
+        like_post=Liked_posts.objects.create(post_id=post_id,username=username)
+        like_post.save()
+        post.no_of_likes+=1
+        post.save()
+        return redirect('/')
+        
 @login_required(login_url='signin')
 def upload(request):
     if request.method=='POST':
@@ -65,6 +80,12 @@ def upload(request):
           
     else: 
         return redirect('/')
+
+def profile(request,pk):
+    user=User.objects.get(username=request.user.username)
+    userProfile=Profile.objects.get(user=user)
+    posts=Post.objects.filter(user=user.username)
+    return render(request,'profile.html',{"user":user,"user_profile":userProfile,"posts":posts})
 
 
 @login_required(login_url='signin')
