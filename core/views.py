@@ -1,14 +1,19 @@
+from django.http import HttpResponse
 from django.shortcuts import render,redirect
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
-from .models import Profile
+from .models import Profile,Post
 from django.contrib.auth.decorators import login_required
 
 
 # Create your views here.
 @login_required(login_url='signin')
 def index(request):
-    return render(request,"index.html")
+    user=User.objects.get(username=request.user.username)
+    userPro=Profile.objects.get(user=user)
+
+    posts=Post.objects.all()
+    return render(request,"index.html",{'user_profile':userPro,'posts':posts})
 
 def signup(request):
     if request.method=='POST':
@@ -43,10 +48,39 @@ def signup(request):
     else:
         return render(request,'signup.html')
 
+@login_required(login_url='signin')
+def liked_post(request):
+    pass
+
+@login_required(login_url='signin')
+def upload(request):
+    if request.method=='POST':
+       if request.FILES.get('post_upload'):
+            image=request.FILES.get('post_upload')
+            caption=request.POST['caption']
+            username=request.user.username
+            post_object=Post.objects.create(user=username,image=image,caption=caption)
+            post_object.save()
+            return redirect('/')
+          
+    else: 
+        return redirect('/')
+
 
 @login_required(login_url='signin')
 def setting(request):
-    return render(request,'setting.html')    
+    user = Profile.objects.get(user=request.user)
+    if request.method=='POST':
+        image = request.FILES.get('profile_pic') if request.FILES.get('profile_pic') else user.profPic
+        bio = request.POST['bio']
+        location = request.POST['location']
+        user.profPic=image
+        user.bio=bio
+        user.location=location
+        user.save()
+
+            
+    return render(request,'setting.html',{"user":user})    
 
 def signin(request):
     
