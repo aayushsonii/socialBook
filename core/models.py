@@ -3,6 +3,9 @@ from django.contrib.auth import get_user_model
 # Create your models here.
 import uuid
 from datetime import datetime
+
+
+
 user=get_user_model()
 
 class Profile(models.Model):
@@ -20,8 +23,15 @@ class Post(models.Model):
     user = models.CharField(max_length=100)
     image = models.ImageField(upload_to="post_images")
     caption = models.TextField()
-    created_at = models.DateTimeField(datetime.now)
+    created_at = models.DateTimeField(default=datetime.now(),)
     no_of_likes = models.IntegerField(default=0)
 
     def __str__(self):
         return self.user
+
+class Liked_posts(models.Model):
+    post_id=models.CharField(max_length=500)
+    username=models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.username 

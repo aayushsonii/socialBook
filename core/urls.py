@@ -2,7 +2,8 @@ from django.urls import path
 from . import views
 urlpatterns = [
     path('',views.index,name="index"),
-    path('upload',views.upload),
+    path('upload',views.upload,name='upload'),
+    path('likes_post',views.liked_post,name='liked_post'),
     path('signup',views.signup,name='signup'),
     path('signin',views.signin,name='signin'),
     path('logout',views.logout,name='logout'),
